@@ -1,65 +1,8 @@
-// import { NextApiRequest, NextApiResponse } from 'next';
-
-// interface Event {
-//   op: string;
-//   data: {
-//     new: {
-//       user_id: string;
-//       title: string;
-//       completed: boolean;
-//     };
-//   };
-// }
-
-// export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-//   const { event } = req.body as { event: Event };
-
-//   if (event.op === 'UPDATE' && event.data.new.completed) {
-//     const { user_id, title } = event.data.new;
-
-//     try {
-//       // Fetch the user's email
-//       // const userEmail = await getUserEmail(user_id);
-//       const userEmail = "samiuljust2018@gmail.com";
-
-//       // Send email notification
-//       await fetch(`https://to-do-next-app-mocha.vercel.app/api/sendEmail`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           to: userEmail,
-//           subject: 'Task Completed Notification',
-//           text: `The task  has been marked as completed.`,
-//         }),
-//       });
-
-//       res.status(200).json({ message: 'Notification sent' });
-//     } catch (error) {
-//       console.error('Error handling webhook:', error);
-//       res.status(500).json({ error: 'Error handling webhook' });
-//     }
-//   } else {
-//     res.status(200).json({ message: 'No action taken' });
-//   }
-// }
-
-
 
 import nodemailer from 'nodemailer';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { nhost } from '@/utils/nhost';
 
-// Configure nodemailer transporter
-// const transporter = nodemailer.createTransport({
-//   host: 'mail.nodescript-it.com', // Your cPanel mail server
-//   port: 465,                     // SSL Port
-//   secure: true,                  // Use SSL
-//   auth: {
-//     user: 'contact@nodescript-it.com', // Your cPanel email address
-//     pass: '1ts1Tc_2w6^=',      // Your cPanel email password
-//   },
-// });
 
 let transporter = nodemailer.createTransport({
   host: 'smtp-relay.sendinblue.com',
@@ -82,6 +25,27 @@ interface Event {
   };
 }
 
+async function getUserEmail(userId: string): Promise<string | null> {
+  const query = `
+    query GetUserEmail($userId: uuid!) {
+      users_by_pk(id: $userId) {
+        email
+      }
+    }
+  `;
+
+  // Make GraphQL request with Nhost
+  const response = await nhost.graphql.request(query, { userId });
+
+  // Check if the response contains the email
+  if (response?.data?.users_by_pk?.email) {
+    return response.data.users_by_pk.email;
+  } else {
+    console.error('No user email found or GraphQL error:', response?.error);
+    return null;
+  }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('Received body:', req.body); // For debugging
 
@@ -89,7 +53,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (event.op === 'UPDATE' && event.data.new.completed) {
     const { user_id, title } = event.data.new;
-    const userEmail = "samiuljust2018@gmail.com"; // Replace with actual user email retrieval
+    const userEmail = await getUserEmail(user_id);
+
+      if (!userEmail) {
+        return res.status(400).json({ error: 'User email not found' });
+      }
 
     try {
       const response=await transporter.sendMail({
