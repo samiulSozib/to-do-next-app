@@ -25,8 +25,7 @@ interface Event {
   };
 }
 
-async function getUserEmail(userId: string): Promise<string | null> {
-  const query = `
+const query = `
     query GetUserEmail($userId: uuid!) {
       users_by_pk(id: $userId) {
         email
@@ -34,17 +33,20 @@ async function getUserEmail(userId: string): Promise<string | null> {
     }
   `;
 
-  // Make GraphQL request with Nhost
-  const response = await nhost.graphql.request(query, { userId });
+// async function getUserEmail(userId: string): Promise<string | null> {
+  
 
-  // Check if the response contains the email
-  if (response?.data?.users_by_pk?.email) {
-    return response.data.users_by_pk.email;
-  } else {
-    console.error('No user email found or GraphQL error:', response?.error);
-    return null;
-  }
-}
+//   // Make GraphQL request with Nhost
+//   const response = await nhost.graphql.request(query, { userId });
+
+//   // Check if the response contains the email
+//   if (response?.data?.users_by_pk?.email) {
+//     return response.data.users_by_pk.email;
+//   } else {
+//     console.error('No user email found or GraphQL error:', response?.error);
+//     return null;
+//   }
+// }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('Received body:', req.body); // For debugging
@@ -53,7 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (event.op === 'UPDATE' && event.data.new.completed) {
     const { user_id, title } = event.data.new;
-    const userEmail = await getUserEmail(user_id);
+    const response = await nhost.graphql.request(query, { user_id });
+    const userEmail = response.data.users_by_pk.email
 
       if (!userEmail) {
         return res.status(400).json({ error: 'User email not found' });
