@@ -2,7 +2,7 @@ import React, { useState,useEffect } from 'react'
 import { nhost } from '../utils/nhost';
 import { useAuthenticationStatus } from '@nhost/react';
 import {useRouter} from 'next/router'
-import Navbar from '../component/Navbar';
+import Navbar from '../components/Navbar';
 
 
 type TRASH = {
