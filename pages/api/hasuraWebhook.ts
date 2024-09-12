@@ -1,7 +1,6 @@
 
 import nodemailer from 'nodemailer';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { nhost } from '../../utils/nhost';
 
 
 let transporter = nodemailer.createTransport({
@@ -67,23 +66,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (event.op === 'UPDATE' && event.data.new.completed) {
     const { user_id, title } = event.data.new;
-    // const response = await nhost.graphql.request(query, { userId:user_id });
-    // const userEmail = response.data.users[0].email
+    
 
-      // if (!userEmail) {
-      //   return res.status(400).json({ error: 'User email not found' });
-      // }
+      const user_email=await getUserEmail(user_id)
 
-      const email=await getUserEmail(user_id)
-
-      const user_email="samiulcse2018@gmail.com"
+      if (!user_email) {
+        return res.status(400).json({ error: 'User email not found' });
+      }
 
     try {
       await transporter.sendMail({
         from: 'samiulcse2018@gmail.com', // Your email address
         to: user_email,
         subject: 'Task Completed Notification',
-        text: `The task "${title}" has been marked as completed. ${email}"`,
+        text: `The task "${title}" has been marked as completed."`,
       });
      
 
