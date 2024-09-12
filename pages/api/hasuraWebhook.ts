@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         body: JSON.stringify({
           to: userEmail,
           subject: 'Task Completed Notification',
-          text: `The task "${title}" has been marked as completed.`,
+          text: `The task  has been marked as completed.`,
         }),
       });
 
