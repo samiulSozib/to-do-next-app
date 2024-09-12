@@ -27,7 +27,7 @@ interface Event {
 
 const query = `
     query GetUserEmail($user_id: uuid!) {
-      users(where:{id:{_eq:user_id}}) {
+      users(where:{id:{_eq:$user_id}}) {
         email
       }
     }
