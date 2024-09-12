@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const userEmail = "samiuljust2018@gmail.com";
 
       // Send email notification
-      await fetch(`https://to-do-next-app-mocha.vercel.app/api/sendEmail`, {
+      await fetch(`/api/sendEmail`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
