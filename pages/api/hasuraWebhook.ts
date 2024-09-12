@@ -55,8 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (event.op === 'UPDATE' && event.data.new.completed) {
     const { user_id, title } = event.data.new;
-    const response = await nhost.graphql.request(query, { userId:user_id });
-    const userEmail = response.data.users[0].email
+    // const response = await nhost.graphql.request(query, { userId:user_id });
+    // const userEmail = response.data.users[0].email
 
       // if (!userEmail) {
       //   return res.status(400).json({ error: 'User email not found' });
@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         from: 'samiulcse2018@gmail.com', // Your email address
         to: user_email,
         subject: 'Task Completed Notification',
-        text: `The task "${title}" has been marked as completed. "${response}"`,
+        text: `The task "${title}" has been marked as completed. "`,
       });
      
 
