@@ -51,15 +51,25 @@ import nodemailer from 'nodemailer';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 // Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-  host: 'mail.nodescript-it.com', // Your cPanel mail server
-  port: 465,                     // SSL Port
-  secure: true,                  // Use SSL
+// const transporter = nodemailer.createTransport({
+//   host: 'mail.nodescript-it.com', // Your cPanel mail server
+//   port: 465,                     // SSL Port
+//   secure: true,                  // Use SSL
+//   auth: {
+//     user: 'contact@nodescript-it.com', // Your cPanel email address
+//     pass: '1ts1Tc_2w6^=',      // Your cPanel email password
+//   },
+// });
+
+let transporter = nodemailer.createTransport({
+  host: 'smtp-relay.sendinblue.com',
+  port: 587,
+  secure: false,
   auth: {
-    user: 'contact@nodescript-it.com', // Your cPanel email address
-    pass: '1ts1Tc_2w6^=',      // Your cPanel email password
-  },
-});
+      user: 'samiuljust2018@gmail.com',
+      pass: 'qJ90I7C2WhN6bBsR'
+  }
+})
 
 interface Event {
   op: string;
@@ -82,23 +92,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userEmail = "samiuljust2018@gmail.com"; // Replace with actual user email retrieval
 
     try {
-      // const response=await transporter.sendMail({
-      //   from: 'samiulcse2018@gmail.com', // Your email address
-      //   to: userEmail,
-      //   subject: 'Task Completed Notification',
-      //   text: `The task "${title}" has been marked as completed.`,
-      // });
-      // console.log(response)
+      const response=await transporter.sendMail({
+        from: 'samiulcse2018@gmail.com', // Your email address
+        to: userEmail,
+        subject: 'Task Completed Notification',
+        text: `The task "${title}" has been marked as completed.`,
+      });
+      console.log(response)
 
-      let transporter = nodemailer.createTransport({
-        host: 'smtp-relay.sendinblue.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: 'samiuljust2018@gmail.com',
-            pass: 'qJ90I7C2WhN6bBsR'
-        }
-    })
+
 
 
       res.status(200).json({ message: 'Notification sent' });
