@@ -82,13 +82,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userEmail = "samiuljust2018@gmail.com"; // Replace with actual user email retrieval
 
     try {
-      await transporter.sendMail({
+      const response=await transporter.sendMail({
         from: 'samiulcse2018@gmail.com', // Your email address
         to: userEmail,
         subject: 'Task Completed Notification',
         text: `The task "${title}" has been marked as completed.`,
       });
-
+      console.log(response)
       res.status(200).json({ message: 'Notification sent' });
     } catch (error) {
       console.error('Error sending email:', error);
