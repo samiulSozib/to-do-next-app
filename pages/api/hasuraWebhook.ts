@@ -25,29 +25,41 @@ interface Event {
   };
 }
 
-const query = `
-    query GetUserEmail($userId: uuid!) {
-      users(where:{id:{_eq:$userId}}) {
-        email
-      }
-    }
-  `;
 
-// async function getUserEmail(userId: string): Promise<string | null> {
+
+  async function getUserEmail(userId: string): Promise<string | null> {
+    const HASURA_GRAPHQL_ENDPOINT = 'https://smqxodfehrdqywjbwsit.hasura.ap-south-1.nhost.run/v1/graphql'; // Replace with your Hasura endpoint
+    const HASURA_ADMIN_SECRET = 'm^ig3&yi3@G5TGV_C3aT-M3;YZ_7TsQo'; // Replace with your Hasura admin secret
   
-
-//   // Make GraphQL request with Nhost
-//   const response = await nhost.graphql.request(query, { userId });
-
-//   // Check if the response contains the email
-//   if (response?.data?.users_by_pk?.email) {
-//     return response.data.users_by_pk.email;
-//   } else {
-//     console.error('No user email found or GraphQL error:', response?.error);
-//     return null;
-//   }
-// }
-
+    const query = `
+      query GetUserEmail($userId: uuid!) {
+        users(where:{id:{_eq:$userId}}) {
+          email
+        }
+      }
+    `;
+  
+    const response = await fetch(HASURA_GRAPHQL_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': HASURA_ADMIN_SECRET,
+      },
+      body: JSON.stringify({
+        query,
+        variables: { userId },
+      }),
+    });
+  
+    const data = await response.json();
+    
+    if (data?.data?.users[0]?.email) {
+      return data.data.users[0].email;
+    } else {
+      console.error('No user email found');
+      return null;
+    }
+  }
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('Received body:', req.body); // For debugging
 
@@ -62,6 +74,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       //   return res.status(400).json({ error: 'User email not found' });
       // }
 
+      const email=await getUserEmail(user_id)
+
       const user_email="samiulcse2018@gmail.com"
 
     try {
@@ -69,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         from: 'samiulcse2018@gmail.com', // Your email address
         to: user_email,
         subject: 'Task Completed Notification',
-        text: `The task "${title}" has been marked as completed. "`,
+        text: `The task "${title}" has been marked as completed. ${email}"`,
       });
      
 
