@@ -89,6 +89,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       //   text: `The task "${title}" has been marked as completed.`,
       // });
       // console.log(response)
+
+      let transporter = nodemailer.createTransport({
+        host: 'smtp-relay.sendinblue.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: 'samiuljust2018@gmail.com',
+            pass: 'qJ90I7C2WhN6bBsR'
+        }
+    })
+
+
       res.status(200).json({ message: 'Notification sent' });
     } catch (error) {
       console.error('Error sending email:', error);
