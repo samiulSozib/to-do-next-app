@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react'
 import { nhost } from '../utils/nhost';
 import { useAuthenticationStatus } from '@nhost/react';
+import {useRouter} from 'next/router'
 
 
 type TRASH = {
@@ -15,38 +16,11 @@ type TRASH = {
     category: string;
   };
 
-  const GET_TRASHS_BY_USER_ID = `
-    query GetTrashsByUserId($user_id: uuid!) {
-    trash(where: {user_id: {_eq: $user_id}}) {
-    user_id
-    updated_at
-    title
-    id
-    description
-    deleted_at
-    created_at
-    completed
-    category
-  }
-}
-`;
-
-const DELETE_TRASH = `
-mutation DeleteTrash($id: uuid!) {
-  delete_trash(where: {id: {_eq: $id}}) {
-    affected_rows
-  }
-}
-`;
-
-
-const DELETE_ALL_TRASH = `
-mutation DeleteAllTrash($user_id: uuid!) {
-  delete_trash(where: {user_id: {_eq: $user_id}}) {
-    affected_rows
-  }
-}
-`;
+  import { 
+    GET_TRASHS_BY_USER_ID,
+    DELETE_TRASH,
+    DELETE_ALL_TRASH
+  } from '../graphql/queries';
 
 const Trash:React.FC = () => {
 
@@ -55,6 +29,7 @@ const Trash:React.FC = () => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
     const [selectedTrash, setselectedTrash] = useState<TRASH | null>(null);
+    const router=useRouter()
 
 
     const fetchTrashs = async () => {
@@ -76,9 +51,13 @@ const Trash:React.FC = () => {
         }
       };
 
-    useEffect(() => {
-        if (isAuthenticated && !isLoading) {
-          fetchTrashs();
+      useEffect(() => {
+        if (!isLoading) {
+          if (!isAuthenticated) {
+            router.push('/auth'); // Redirect to authentication page if not authenticated
+          } else {
+            fetchTrashs();
+          }
         }
       }, [isAuthenticated, isLoading]);
 

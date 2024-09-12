@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {nhost} from '../utils/nhost'
 import {useAuthenticated} from '@nhost/nextjs'
 import {useRouter} from 'next/router'
@@ -6,7 +6,7 @@ import {useRouter} from 'next/router'
 const Auth: React.FC = () => {
 
   const isAuthenticated=useAuthenticated()
-  const route=useRouter()
+  const router=useRouter()
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -32,13 +32,19 @@ const Auth: React.FC = () => {
         }
         console.log('Login result:', result);
         alert('Login successful');
-        route.push('/')
+        router.push('/')
       }
 
     } catch (error) {
       alert('Authentication failed: ' + (error as Error).message);
     }
   };
+
+  useEffect(()=>{
+    if(isAuthenticated){
+      router.push('/')
+    }
+  },[isAuthenticated])
 
   return (
     <div>
@@ -69,7 +75,7 @@ const Auth: React.FC = () => {
         <div className='w-full flex justify-between text-sm mt-[-8px]'>
           {currentState === 'Login' ? (
             <p onClick={() => setCurrentState('Sign Up')} className='cursor-pointer'>
-              Create Account
+              Don't Have An Account ? Create Account
             </p>
           ) : (
             <p onClick={() => setCurrentState('Login')} className='cursor-pointer'>

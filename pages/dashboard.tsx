@@ -3,6 +3,7 @@ import { nhost } from '../utils/nhost';
 import { useAuthenticationStatus } from '@nhost/react';
 import { useRouter } from 'next/router';
 
+
 type Todo = {
   id: string;
   user_id: string;
@@ -14,62 +15,16 @@ type Todo = {
   category: string;
 };
 
-const GET_TODOS_BY_USER_ID = `
-query GetTodosByUserId($user_id: uuid!) {
-  todos(where: {user_id: {_eq: $user_id}}) {
-    id
-    user_id
-    title
-    description
-    completed
-    created_at
-    updated_at
-    category
-  }
-}
-`;
+import { 
+  GET_TODOS_BY_USER_ID, 
+  INSERT_TODO, 
+  UPDATE_TODO, 
+  DELETE_TODO, 
+  INSERT_TRASH, 
+  MOVE_TO_TRASH, 
+  UPDATE_TODO_COMPLETED 
+} from '../graphql/queries';
 
-const INSERT_TODO = `
-mutation InsertTodo($user_id: uuid, $title: String, $description: String, $completed: Boolean, $category: String) {
-  insert_todos(objects: { user_id: $user_id, title: $title, description: $description, completed: $completed, category: $category }) {
-    affected_rows
-  }
-}
-`;
-
-const UPDATE_TODO = `
-mutation UpdateTodo($id: uuid!, $title: String!, $description: String!, $category: String!, $completed: Boolean!) {
-  update_todos(where: {id: {_eq: $id}}, _set: {title: $title, description: $description, category: $category, completed: $completed}) {
-    affected_rows
-  }
-}
-`;
-
-const DELETE_TODO = `
-mutation DeleteTodo($id: uuid!) {
-  delete_todos(where: {id: {_eq: $id}}) {
-    affected_rows
-  }
-}
-`;
-
-const INSERT_TRASH = `
-mutation InsertTodo($user_id: uuid, $title: String, $description: String, $completed: Boolean,$created_at:timestamptz,$updated_at:timestamptz, $category: String) {
-  insert_trash(objects: { user_id: $user_id, title: $title, description: $description, completed: $completed,created_at:$created_at,updated_at:$updated_at, category: $category }) {
-    affected_rows
-  }
-}
-`;
-
-
-
-const UPDATE_TODO_COMPLETED = `
-mutation UpdateTodoCompleted($id: uuid!, $completed: Boolean!) {
-  update_todos(where: {id: {_eq: $id}}, _set: {completed: $completed}) {
-    affected_rows
-  }
-}
-`;
 
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuthenticationStatus();
@@ -81,6 +36,8 @@ const Dashboard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Todo | null>(null);
   const [suggestions, setSuggestions] = useState('');
   const router=useRouter()
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
 
   const handleToggleTodo = async(id: string, currentCompletedStatus: boolean) => {
@@ -107,15 +64,20 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const fetchTodos = async () => {
+  const fetchTodos = async (limit: number, offset: number) => {
     const user = nhost.auth.getUser();
     if (!user) {
       console.error("User is not authenticated.");
       return;
     }
-
+  
     try {
-      const response = await nhost.graphql.request(GET_TODOS_BY_USER_ID, { user_id: user.id });
+      const response = await nhost.graphql.request(GET_TODOS_BY_USER_ID, {
+        user_id: user.id,
+        limit,
+        offset,
+      });
+  
       if (response.error) {
         console.error('Error fetching ToDos:', response.error);
       } else {
@@ -125,11 +87,17 @@ const Dashboard: React.FC = () => {
       console.error('GraphQL Error:', error);
     }
   };
+  
 
   const handleAddTodo = async () => {
     const user = nhost.auth.getUser();
     if (!user) {
       console.error('User is not authenticated.');
+      return;
+    }
+
+    if (!newTask.title || !newTask.description || !newTask.category) {
+      alert("All fields are required!");
       return;
     }
 
@@ -159,6 +127,10 @@ const Dashboard: React.FC = () => {
 
   const handleUpdateTodo = async () => {
     if (!selectedTask) return;
+    if (!selectedTask.title || !selectedTask.description || !selectedTask.category) {
+      alert("All fields are required!");
+      return;
+    }
 
     try {
       const response = await nhost.graphql.request(UPDATE_TODO, {
@@ -190,6 +162,8 @@ const Dashboard: React.FC = () => {
     setShowUpdateModal(true);
   };
 
+  
+
   const handleDeleteTodo = async () => {
     if (!selectedTask) return;
 
@@ -212,6 +186,12 @@ const Dashboard: React.FC = () => {
 
       const response = await nhost.graphql.request(DELETE_TODO, { id: selectedTask.id });
 
+     
+ 
+      
+      //const response=await nhost.graphql.request(MOVE_TO_TRASH,{todo_id:selectedTask.id})
+
+      console.log(response)
       if (response.error) {
         console.error('Error deleting ToDo:', response.error);
       } else {
@@ -277,23 +257,36 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      fetchTodos();
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/auth'); // Redirect to authentication page if not authenticated
+      } else {
+        fetchTodos(itemsPerPage, (currentPage - 1) * itemsPerPage);
+      }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading,currentPage]);
 
-  const gotoTrash=()=>{
-    router.push('/trash')
-  }
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
+    fetchTodos(itemsPerPage, currentPage * itemsPerPage);
+  };
+  
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      fetchTodos(itemsPerPage, (currentPage - 2) * itemsPerPage);
+    }
+  };
 
   return (
+    
     <div>
       <div className="container mx-auto p-6">
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">To Do</h2>
-              <button onClick={gotoTrash}>Trash</button>
+              <h2 className="text-lg font-semibold text-gray-900">ToDo Lists</h2>
+             
             </div>
             <button
               className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
@@ -310,8 +303,11 @@ const Dashboard: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Description</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Category</th>
-                <th className="relative px-6 py-3">
-                  <span className="sr-only">Edit</span>
+                <th className="px-6 py-3">
+                  
+                </th>
+                <th className='px-6 py-3'>
+
                 </th>
               </tr>
             </thead>
@@ -335,7 +331,9 @@ const Dashboard: React.FC = () => {
                     >
                       Edit
                     </button>
-                    <button
+                  </td>
+                  <td>
+                  <button
                       className="text-red-600 hover:text-red-900 ml-2"
                       onClick={() => handleOpenDeleteDialog(todo)}
                     >
@@ -346,79 +344,104 @@ const Dashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
+            <div className="flex justify-center items-center mt-6">
+              <button
+                className="bg-gray-300 py-2 px-4 rounded-lg mr-3"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+
+              <span>Page {currentPage}</span>
+
+              <button
+                className="bg-gray-300 py-2 px-4 rounded-lg ml-3"
+                onClick={handleNextPage}
+              >
+                Next
+              </button>
+          </div>
+
         </div>
       </div>
 
       {/* Modal for adding a new task */}
 
-{showAddModal && (
-  <div className="fixed z-10 inset-0 overflow-y-auto">
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="bg-white rounded-lg p-6 shadow-xl">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Task</h3>
-        <div>
-          <input
-            type="text"
-            placeholder="Task Title"
-            value={newTask.title}
-            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-            className="border border-gray-300 rounded-md w-full p-2 mb-4"
-          />
-          <button
-            onClick={handleGetSuggestions}
-            className="bg-blue-600 text-white py-1 px-2 rounded-md mb-4"
-          >
-            Get AI Suggestions
-          </button>
+      {showAddModal && (
+        <div className="fixed z-10 inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="bg-white rounded-lg p-6 shadow-xl">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Task</h3>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Task Title"
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                    className={`border ${!newTask.title ? 'border-red-500' : 'border-gray-300'} rounded-md w-full p-2 mb-4`}
+                    required
+                  />
+                  <button
+                    onClick={handleGetSuggestions}
+                    className="bg-blue-600 text-white py-1 px-2 rounded-md mb-4"
+                  >
+                    Get AI Suggestions
+                  </button>
 
-          <textarea
-            placeholder="Task Description"
-            value={newTask.description}
-            onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-            className="border border-gray-300 rounded-md w-full p-2 mb-4"
-          />
-          {suggestions && (
-            <div className="bg-gray-100 p-4 rounded-md mb-4">
-              <h4 className="text-gray-600 font-semibold">AI Suggestions:</h4>
-              <p>{suggestions}</p>
-              <button
-                onClick={() => setNewTask({ ...newTask, description: suggestions })}
-                className="bg-green-600 text-white py-1 px-2 rounded-md mt-2"
-              >
-                Use Suggestion
-              </button>
+                  <textarea
+                    placeholder="Task Description"
+                    value={newTask.description}
+                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                    className={`border ${!newTask.description ? 'border-red-500' : 'border-gray-300'} rounded-md w-full p-2 mb-4`}
+                    required
+                  />
+                  {suggestions && (
+                    <div className="bg-gray-100 p-4 rounded-md mb-4">
+                      <h4 className="text-gray-600 font-semibold">AI Suggestions:</h4>
+                      <p>{suggestions}</p>
+                      <button
+                        onClick={() => setNewTask({ ...newTask, description: suggestions })}
+                        className="bg-green-600 text-white py-1 px-2 rounded-md mt-2"
+                      >
+                        Use Suggestion
+                      </button>
+                    </div>
+                  )}
+
+                  <select
+                    value={newTask.category}
+                    onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
+                    className={`border ${!newTask.category ? 'border-red-500' : 'border-gray-300'} rounded-md w-full p-2 mb-4`}
+                    required
+                  >
+                    <option value="" disabled>Select Category</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Work">Work</option>
+                    <option value="Education">Education</option>
+                  </select>
+                </div>
+
+                <div className="mt-5">
+                  <button
+                    onClick={handleAddTodo}
+                    className={`bg-purple-600 text-white py-2 px-4 rounded-lg w-full ${(!newTask.title || !newTask.description || !newTask.category) && 'opacity-50 cursor-not-allowed'}`}
+                    disabled={!newTask.title || !newTask.description || !newTask.category}
+                  >
+                    Add Task
+                  </button>
+                  <button
+                    onClick={() => setShowAddModal(false)}
+                    className="mt-3 text-gray-500 w-full"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
-          )}
+        </div> 
+      )}
 
-          <select
-            value={newTask.category}
-            onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
-            className="border border-gray-300 rounded-md w-full p-2 mb-4"
-          >
-            <option value="Personal">Personal</option>
-            <option value="Work">Work</option>
-            <option value="Education">Education</option>
-          </select>
-        </div>
-
-        <div className="mt-5">
-          <button
-            onClick={handleAddTodo}
-            className="bg-purple-600 text-white py-2 px-4 rounded-lg w-full"
-          >
-            Add Task
-          </button>
-          <button
-            onClick={() => setShowAddModal(false)}
-            className="mt-3 text-gray-500 w-full"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
 
 
       {/* Modal for updating a task */}
@@ -434,22 +457,37 @@ const Dashboard: React.FC = () => {
                   onChange={(e) =>
                     setSelectedTask({ ...selectedTask, title: e.target.value })
                   }
-                  className="border border-gray-300 rounded-md w-full p-2 mb-4"
+                  className={`border ${
+                    !selectedTask.title ? 'border-red-500' : 'border-gray-300'
+                  } rounded-md w-full p-2 mb-4`}
+                  required
                 />
                 <textarea
                   value={selectedTask.description}
                   onChange={(e) =>
-                    setSelectedTask({ ...selectedTask, description: e.target.value })
+                    setSelectedTask({
+                      ...selectedTask,
+                      description: e.target.value,
+                    })
                   }
-                  className="border border-gray-300 rounded-md w-full p-2 mb-4"
+                  className={`border ${
+                    !selectedTask.description ? 'border-red-500' : 'border-gray-300'
+                  } rounded-md w-full p-2 mb-4`}
+                  required
                 />
                 <select
                   value={selectedTask.category}
                   onChange={(e) =>
                     setSelectedTask({ ...selectedTask, category: e.target.value })
                   }
-                  className="border border-gray-300 rounded-md w-full p-2 mb-4"
+                  className={`border ${
+                    !selectedTask.category ? 'border-red-500' : 'border-gray-300'
+                  } rounded-md w-full p-2 mb-4`}
+                  required
                 >
+                  <option value="" disabled>
+                    Select Category
+                  </option>
                   <option value="Personal">Personal</option>
                   <option value="Work">Work</option>
                   <option value="Education">Education</option>
@@ -459,7 +497,15 @@ const Dashboard: React.FC = () => {
               <div className="mt-5">
                 <button
                   onClick={handleUpdateTodo}
-                  className="bg-purple-600 text-white py-2 px-4 rounded-lg w-full"
+                  className={`bg-purple-600 text-white py-2 px-4 rounded-lg w-full ${
+                    (!selectedTask.title ||
+                      !selectedTask.description ||
+                      !selectedTask.category) &&
+                    'opacity-50 cursor-not-allowed'
+                  }`}
+                  disabled={
+                    !selectedTask.title || !selectedTask.description || !selectedTask.category
+                  }
                 >
                   Update Task
                 </button>
@@ -474,6 +520,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+
 
       {/* Delete Alert Dialog */}
       {showDeleteDialog && selectedTask && (

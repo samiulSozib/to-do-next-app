@@ -10,7 +10,7 @@ import {OpenAI} from 'openai'
 //     apiKey: 's', // This is the default and can be omitted
 //   });
   const openai = new OpenAI({
-    apiKey: '', // This is the default and can be omitted
+    apiKey: process.env.OPENAI_SECRET, // This is the default and can be omitted
   });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
