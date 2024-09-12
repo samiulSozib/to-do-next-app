@@ -26,8 +26,8 @@ interface Event {
 }
 
 const query = `
-    query GetUserEmail($userId: uuid!) {
-      users_by_pk(id: $userId) {
+    query GetUserEmail($user_id: uuid!) {
+      users(where:{id:{_eq:user_id}}) {
         email
       }
     }
@@ -56,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (event.op === 'UPDATE' && event.data.new.completed) {
     const { user_id, title } = event.data.new;
     const response = await nhost.graphql.request(query, { user_id });
-    const userEmail = response.data.users_by_pk.email
+    const userEmail = response.data.users[0].email
 
       if (!userEmail) {
         return res.status(400).json({ error: 'User email not found' });
