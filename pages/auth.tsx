@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {nhost} from '../utils/nhost'
 import {useAuthenticated} from '@nhost/nextjs'
 import {useRouter} from 'next/router'
-import Navbar from '@/component/Navbar';
+import Navbar from '../component/Navbar';
 
 const Auth: React.FC = () => {
 

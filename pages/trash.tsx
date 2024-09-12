@@ -2,6 +2,7 @@ import React, { useState,useEffect } from 'react'
 import { nhost } from '../utils/nhost';
 import { useAuthenticationStatus } from '@nhost/react';
 import {useRouter} from 'next/router'
+import Navbar from '../component/Navbar';
 
 
 type TRASH = {
@@ -21,7 +22,7 @@ type TRASH = {
     DELETE_TRASH,
     DELETE_ALL_TRASH
   } from '../graphql/queries';
-import Navbar from '@/component/Navbar';
+
 
 const Trash:React.FC = () => {
 

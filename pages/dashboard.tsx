@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { nhost } from '../utils/nhost';
 import { useAuthenticationStatus } from '@nhost/react';
 import { useRouter } from 'next/router';
+import Navbar from '../component/Navbar';
 
 
 type Todo = {
@@ -24,7 +25,7 @@ import {
   MOVE_TO_TRASH, 
   UPDATE_TODO_COMPLETED 
 } from '../graphql/queries';
-import Navbar from '@/component/Navbar';
+
 
 
 
