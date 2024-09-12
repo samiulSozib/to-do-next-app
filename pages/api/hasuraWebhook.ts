@@ -1,7 +1,7 @@
 
 import nodemailer from 'nodemailer';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { nhost } from '@/utils/nhost';
+import { nhost } from '../../utils/nhost';
 
 
 let transporter = nodemailer.createTransport({
