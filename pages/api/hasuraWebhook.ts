@@ -26,8 +26,8 @@ interface Event {
 }
 
 const query = `
-    query GetUserEmail($user_id: uuid!) {
-      users(where:{id:{_eq:$user_id}}) {
+    query GetUserEmail($userId: uuid!) {
+      users(where:{id:{_eq:$userId}}) {
         email
       }
     }
@@ -55,12 +55,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (event.op === 'UPDATE' && event.data.new.completed) {
     const { user_id, title } = event.data.new;
-    const response = await nhost.graphql.request(query, { user_id });
+    const response = await nhost.graphql.request(query, { userId:user_id });
     const userEmail = response.data.users[0].email
 
-      if (!userEmail) {
-        return res.status(400).json({ error: 'User email not found' });
-      }
+      // if (!userEmail) {
+      //   return res.status(400).json({ error: 'User email not found' });
+      // }
 
       const user_email="samiulcse2018@gmail.com"
 
