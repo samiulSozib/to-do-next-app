@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {nhost} from '../utils/nhost'
 import {useAuthenticated} from '@nhost/nextjs'
 import {useRouter} from 'next/router'
+import Navbar from '@/component/Navbar';
 
 const Auth: React.FC = () => {
 
@@ -48,6 +49,8 @@ const Auth: React.FC = () => {
 
   return (
     <div>
+      <Navbar/>
+      <div>
       <form
         className='flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800'
         onSubmit={handleSubmit}
@@ -92,6 +95,7 @@ const Auth: React.FC = () => {
       </form>
 
 
+    </div>
     </div>
   );
 };

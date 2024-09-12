@@ -16,7 +16,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     
       <NhostProvider nhost={nhost}>
-        <Navbar/>
+      
         <Component {...pageProps} />
       </NhostProvider>
     

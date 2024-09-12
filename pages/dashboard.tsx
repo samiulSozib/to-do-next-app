@@ -24,6 +24,8 @@ import {
   MOVE_TO_TRASH, 
   UPDATE_TODO_COMPLETED 
 } from '../graphql/queries';
+import Navbar from '@/component/Navbar';
+
 
 
 const Dashboard: React.FC = () => {
@@ -281,6 +283,9 @@ const Dashboard: React.FC = () => {
   return (
     
     <div>
+
+      <Navbar/>
+
       <div className="container mx-auto p-6">
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">

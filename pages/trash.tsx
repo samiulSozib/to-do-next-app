@@ -21,6 +21,7 @@ type TRASH = {
     DELETE_TRASH,
     DELETE_ALL_TRASH
   } from '../graphql/queries';
+import Navbar from '@/component/Navbar';
 
 const Trash:React.FC = () => {
 
@@ -113,7 +114,11 @@ const Trash:React.FC = () => {
       }
 
   return (
-    <div className="container mx-auto p-6">
+    <div>
+
+    <Navbar/>
+
+      <div className="container mx-auto p-6">
         <div className="bg-white shadow-md rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
             <div>
@@ -217,6 +222,7 @@ const Trash:React.FC = () => {
         </div>
       )}
       </div>
+    </div>
   )
 }
 
