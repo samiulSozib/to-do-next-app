@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import Navbar from '../components/Navbar';
 
 
+
 type Todo = {
   id: string;
   user_id: string;
@@ -41,7 +42,12 @@ const Dashboard: React.FC = () => {
   const router=useRouter()
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
+  const toggleOrder = () => {
+    setOrder(order === 'asc' ? 'desc' : 'asc');
+    fetchTodos(itemsPerPage, (currentPage - 1) * itemsPerPage, order === 'asc' ? 'desc' : 'asc');
+  };
 
   const handleToggleTodo = async(id: string, currentCompletedStatus: boolean) => {
     try {
@@ -67,7 +73,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const fetchTodos = async (limit: number, offset: number) => {
+  const fetchTodos = async (limit: number, offset: number, order: 'asc' | 'desc') => {
     const user = nhost.auth.getUser();
     if (!user) {
       console.error("User is not authenticated.");
@@ -79,6 +85,7 @@ const Dashboard: React.FC = () => {
         user_id: user.id,
         limit,
         offset,
+        order_by: order, // Pass the order here
       });
   
       if (response.error) {
@@ -90,6 +97,7 @@ const Dashboard: React.FC = () => {
       console.error('GraphQL Error:', error);
     }
   };
+  
   
 
   const handleAddTodo = async () => {
@@ -189,7 +197,7 @@ const Dashboard: React.FC = () => {
 
       const response = await nhost.graphql.request(DELETE_TODO, { id: selectedTask.id });
 
-     
+
  
       
       //const response=await nhost.graphql.request(MOVE_TO_TRASH,{todo_id:selectedTask.id})
@@ -264,20 +272,20 @@ const Dashboard: React.FC = () => {
       if (!isAuthenticated) {
         router.push('/auth'); // Redirect to authentication page if not authenticated
       } else {
-        fetchTodos(itemsPerPage, (currentPage - 1) * itemsPerPage);
+        fetchTodos(itemsPerPage, (currentPage - 1) * itemsPerPage, order); // Pass the order state
       }
     }
-  }, [isAuthenticated, isLoading,currentPage]);
+  }, [isAuthenticated, isLoading, currentPage, order]);
 
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
-    fetchTodos(itemsPerPage, currentPage * itemsPerPage);
+    fetchTodos(itemsPerPage, currentPage * itemsPerPage,order);
   };
   
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      fetchTodos(itemsPerPage, (currentPage - 2) * itemsPerPage);
+      fetchTodos(itemsPerPage, (currentPage - 2) * itemsPerPage,order);
     }
   };
 
@@ -290,10 +298,18 @@ const Dashboard: React.FC = () => {
       <div className="container mx-auto p-6">
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
-            <div>
+            <div className='flex flex-col'>
               <h2 className="text-lg font-semibold text-gray-900">ToDo Lists</h2>
-             
+              <button
+                className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
+                onClick={toggleOrder}>{order === 'asc' ? 'Oldest' : 'Newest'}
+              </button>
             </div>
+
+
+            
+
+
             <button
               className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
               onClick={() => setShowAddModal(true)}

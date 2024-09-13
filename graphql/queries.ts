@@ -1,7 +1,7 @@
 
 export const GET_TODOS_BY_USER_ID = `
-query GET_TODOS_BY_USER_ID($user_id: uuid!, $limit: Int, $offset: Int) {
-  todos(where: {user_id: {_eq: $user_id}}, limit: $limit, offset: $offset) {
+query GetTodosByUserId($user_id: uuid!, $limit: Int, $offset: Int, $order_by: order_by!) {
+  todos(where: { user_id: { _eq: $user_id } }, limit: $limit, offset: $offset, order_by: { created_at: $order_by }) {
     id
     user_id
     title
@@ -47,7 +47,7 @@ mutation InsertTodo($user_id: uuid, $title: String, $description: String, $compl
 `;
 
 export const MOVE_TO_TRASH = `
-  mutation MoveToTrash($todo_id: uuid!) {
+  mutation moveToTrashFromTodo($todo_id: uuid!) {
     move_to_trash_from_todo(args: { todo_id: $todo_id }) {
       id
       title
