@@ -1,16 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-// import { Configuration, OpenAIApi } from 'openai';
+
 import {OpenAI} from 'openai'
 
-
-
-// const openai = new OpenAIApi(configuration);
-
-// const openai = new OpenAI({
-//     apiKey: 's', // This is the default and can be omitted
-//   });
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_SECRET, // This is the default and can be omitted
+    apiKey: process.env.OPENAI_SECRET, 
   });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -25,11 +18,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // const response = await openai.createCompletion({
-    //   model: 'text-davinci-003',
-    //   prompt: `Suggest details for a task based on the title: "${title}"`,
-    //   max_tokens: 150,
-    // });
 
     const response=await openai.chat.completions.create({
         messages:[{role:'user',content:`Suggest details for a task based on the title: "${title}"`}],

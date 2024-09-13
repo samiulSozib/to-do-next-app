@@ -27,8 +27,11 @@ interface Event {
 
 
   async function getUserEmail(userId: string): Promise<string | null> {
-    const HASURA_GRAPHQL_ENDPOINT = 'https://smqxodfehrdqywjbwsit.hasura.ap-south-1.nhost.run/v1/graphql'
-    const HASURA_ADMIN_SECRET = 'm^ig3&yi3@G5TGV_C3aT-M3;YZ_7TsQo';
+    // const HASURA_GRAPHQL_ENDPOINT = 'https://smqxodfehrdqywjbwsit.hasura.ap-south-1.nhost.run/v1/graphql'
+    // const HASURA_ADMIN_SECRET = 'm^ig3&yi3@G5TGV_C3aT-M3;YZ_7TsQo';
+
+      const HASURA_GRAPHQL_ENDPOINT = process.env.HASURA_GRAPHQL_ENDPOINT
+      const HASURA_ADMIN_SECRET = process.env.HASURA_ADMIN_SECRET
 
   
     const query = `
@@ -39,11 +42,11 @@ interface Event {
       }
     `;
   
-    const response = await fetch('https://smqxodfehrdqywjbwsit.hasura.ap-south-1.nhost.run/v1/graphql', {
+    const response = await fetch(`${process.env.HASURA_GRAPHQL_ENDPOINT}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-hasura-admin-secret': 'm^ig3&yi3@G5TGV_C3aT-M3;YZ_7TsQo',
+        'x-hasura-admin-secret': `${process.env.HASURA_ADMIN_SECRET}`,
       },
       body: JSON.stringify({
         query,

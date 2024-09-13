@@ -48,7 +48,7 @@ mutation InsertTodo($user_id: uuid, $title: String, $description: String, $compl
 
 export const MOVE_TO_TRASH = `
   mutation moveToTrashFromTodo($todo_id: uuid!) {
-    move_to_trash_from_todo(args: { todo_id: $todo_id }) {
+    todo_to_trash(args: { todo_id: $todo_id }) {
       id
       title
       description
