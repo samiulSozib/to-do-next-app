@@ -106,12 +106,12 @@ const Dashboard: React.FC = () => {
       console.error('User is not authenticated.');
       return;
     }
-
+  
     if (!newTask.title || !newTask.description || !newTask.category) {
       alert("All fields are required!");
       return;
     }
-
+  
     const newTodo = {
       user_id: user.id,
       title: newTask.title,
@@ -119,22 +119,37 @@ const Dashboard: React.FC = () => {
       completed: false,
       category: newTask.category,
     };
-    setNewTask({ title: '', description: '', category: 'Personal' });
-    setSuggestions('')
-    setShowAddModal(false);
-
+  
     try {
       const response = await nhost.graphql.request(INSERT_TODO, newTodo);
+     
       if (response.error) {
         console.error('Error inserting ToDo:', response.error);
       } else {
-        const response1 = await nhost.graphql.request(GET_TODOS_BY_USER_ID, { user_id: user.id });
-        setTasks(response1.data.todos);
+        // Directly update the tasks state
+        setTasks((prevTasks) => [
+          ...prevTasks,
+          {
+            id: response.data.insert_todos_one.id,
+            user_id: user.id,
+            title: newTask.title,
+            description: newTask.description,
+            completed: false,
+            created_at: response.data.insert_todos_one.created_at, 
+            updated_at: response.data.insert_todos_one.updated_at,
+            category: newTask.category,
+          },
+        ]);
+        // Clear the input fields and close the modal
+        setNewTask({ title: '', description: '', category: 'Personal' });
+        setSuggestions('');
+        setShowAddModal(false);
       }
     } catch (error) {
       console.error('GraphQL Error:', error);
     }
   };
+  
 
   const handleUpdateTodo = async () => {
     if (!selectedTask) return;
@@ -302,7 +317,7 @@ const Dashboard: React.FC = () => {
               <h2 className="text-lg font-semibold text-gray-900">ToDo Lists</h2>
               <button
                 className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
-                onClick={toggleOrder}>{order === 'asc' ? 'Oldest' : 'Newest'}
+                onClick={toggleOrder}>{order === 'asc' ? 'Newest' : 'Oldest'}
               </button>
             </div>
 

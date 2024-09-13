@@ -16,8 +16,15 @@ query GetTodosByUserId($user_id: uuid!, $limit: Int, $offset: Int, $order_by: or
 
 export const INSERT_TODO = `
 mutation InsertTodo($user_id: uuid, $title: String, $description: String, $completed: Boolean, $category: String) {
-  insert_todos(objects: { user_id: $user_id, title: $title, description: $description, completed: $completed, category: $category }) {
-    affected_rows
+  insert_todos_one(object: { user_id: $user_id, title: $title, description: $description, completed: $completed, category: $category }) {
+      user_id
+      updated_at
+      title
+      id
+      description
+      created_at
+      completed
+      category
   }
 }
 `;
