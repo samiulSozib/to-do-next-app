@@ -205,6 +205,8 @@ const Dashboard: React.FC = () => {
         category:selectedTask.category
       })
 
+     
+
       if(result.error){
         alert('Error moving task to trash: ');
         return;

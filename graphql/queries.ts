@@ -46,7 +46,7 @@ mutation DeleteTodo($id: uuid!) {
 `;
 
 export const INSERT_TRASH = `
-mutation InsertTodo($user_id: uuid, $title: String, $description: String, $completed: Boolean,$created_at:timestamptz,$updated_at:timestamptz, $category: String) {
+mutation InsertTrash($user_id: uuid, $title: String, $description: String, $completed: Boolean,$created_at:timestamptz,$updated_at:timestamptz, $category: String) {
   insert_trash(objects: { user_id: $user_id, title: $title, description: $description, completed: $completed,created_at:$created_at,updated_at:$updated_at, category: $category }) {
     affected_rows
   }
