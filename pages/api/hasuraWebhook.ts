@@ -8,8 +8,8 @@ let transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-      user: "samiuljust2018@gmail.com",
-      pass: "qJ90I7C2WhN6bBsR"
+      user: `${process.env.SMTP_USER}`,
+      pass: `${process.env.SMTP_PASSWORD}`
   }
 })
 
@@ -27,12 +27,6 @@ interface Event {
 
 
   async function getUserEmail(userId: string): Promise<string | null> {
-    // const HASURA_GRAPHQL_ENDPOINT = 'https://smqxodfehrdqywjbwsit.hasura.ap-south-1.nhost.run/v1/graphql'
-    // const HASURA_ADMIN_SECRET = 'm^ig3&yi3@G5TGV_C3aT-M3;YZ_7TsQo';
-
-      const HASURA_GRAPHQL_ENDPOINT = process.env.HASURA_GRAPHQL_ENDPOINT
-      const HASURA_ADMIN_SECRET = process.env.HASURA_ADMIN_SECRET
-
   
     const query = `
       query GetUserEmail($userId: uuid!) {
