@@ -18,16 +18,16 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Add .env.local file 
 
 ```
-OPENAI_SECRET=sk-proj-S8it9E303em4EeBwRFHDT3BlbkFJYHDzwJLSXm0DegT63SPG
-HASURA_GRAPHQL_ENDPOINT=https://smqxodfehrdqywjbwsit.hasura.ap-south-1.nhost.run/v1/graphql
-HASURA_ADMIN_SECRET=m^ig3&yi3@G5TGV_C3aT-M3;YZ_7TsQo
+OPENAI_SECRET=
+HASURA_GRAPHQL_ENDPOINT=
+HASURA_ADMIN_SECRET=
 
 
-SMTP_USER=samiuljust2018@gmail.com
-SMTP_PASSWORD=qJ90I7C2WhN6bBsR
+SMTP_USER=
+SMTP_PASSWORD=
 
-NEXT_PUBLIC_SUBDOMAIN=smqxodfehrdqywjbwsit
-NEXT_PUBLIC_RIGION=ap-south-1
+NEXT_PUBLIC_SUBDOMAIN=
+NEXT_PUBLIC_RIGION=
 
 ```
 
